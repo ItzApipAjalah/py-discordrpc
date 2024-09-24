@@ -7,7 +7,7 @@ Discord Custom Activity is a Python application that allows you to set a custom 
 - Set custom activity type (Playing, Listening to, Watching)
 - Customizable activity text and description
 - Add large and small images with descriptions
-- BUTTON (BUG :V)
+- button
 - Option to include a timestamp
 - Save and load configuration
 - Minimize to system tray

@@ -14,10 +14,13 @@ class DiscordCustomActivity:
         self.root = tk.Tk()
         self.root.withdraw()  
 
-        self.client_id = simpledialog.askstring("Client ID", "Enter your Discord application client ID:")
+        self.client_id = self.load_client_id()
         if not self.client_id:
-            self.root.destroy()
-            return
+            self.client_id = simpledialog.askstring("Client ID", "Enter your Discord application client ID:")
+            if not self.client_id:
+                self.root.destroy()
+                return
+            self.save_client_id(self.client_id)
 
         self.RPC = Presence(self.client_id)
         self.RPC.connect()
@@ -58,6 +61,27 @@ class DiscordCustomActivity:
 
         self.create_widgets()
         self.create_tray_icon()
+
+    def save_client_id(self, client_id):
+        appdata_path = os.getenv('APPDATA')
+        config_path = os.path.join(appdata_path, 'discord_custom_activity_client_id.json')
+        with open(config_path, 'w') as config_file:
+            json.dump({"client_id": client_id}, config_file)
+
+    def load_client_id(self):
+        appdata_path = os.getenv('APPDATA')
+        config_path = os.path.join(appdata_path, 'discord_custom_activity_client_id.json')
+        if os.path.exists(config_path):
+            with open(config_path, 'r') as config_file:
+                config = json.load(config_file)
+                return config.get("client_id")
+        return None
+
+    def clear_client_id(self):
+        appdata_path = os.getenv('APPDATA')
+        config_path = os.path.join(appdata_path, 'discord_custom_activity_client_id.json')
+        if os.path.exists(config_path):
+            os.remove(config_path)
 
     def create_widgets(self):
         ttk.Label(self.root, text="Activity Type:").pack(pady=5)
@@ -101,11 +125,18 @@ class DiscordCustomActivity:
 
         ttk.Button(self.root, text="Hide to Tray", command=self.hide_to_tray).pack(pady=5, fill=tk.X)
         
+        ttk.Button(self.root, text="Logout", command=self.logout).pack(pady=5, fill=tk.X)
+        
         ttk.Button(self.root, text="Exit", command=self.exit_app).pack(pady=5, fill=tk.X)
 
         ttk.Label(self.root, text="Status:").pack(pady=5)
         self.status_label = ttk.Label(self.root, text="Connected")
         self.status_label.pack(pady=5, fill=tk.X)
+
+    def logout(self):
+        self.clear_client_id()
+        self.root.destroy()
+        self.__init__()
 
     def set_activity(self):
         activity_type = self.activity_type.get()
